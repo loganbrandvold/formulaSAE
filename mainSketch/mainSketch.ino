@@ -35,12 +35,12 @@ bool      buffer_loaded = false;
 uint16_t  spr_width = 0;
 
 struct mess{
-  int packetsize;
+  int packetSize;
   bool packetExtended;
   bool packetRtr;
   long packetId;
   int message[8];
-}
+};
 
 struct mess queue[5];
 int pos = 0;
@@ -212,7 +212,7 @@ void loop() {
       if (queue[pos].packetRtr) {
       } else {
         Serial.print(" and length ");
-        Serial.println(packet_size);
+        Serial.println(queue[pos].packetSize);
 
         //AEM Infinity Series 3 IDs
         switch(ID){
@@ -249,7 +249,9 @@ void loop() {
       }
       Serial.println();
     }
-  } 
+  }
+  pos--;
+  if(pos<0)pos = 4; 
 }
 
 void screen(void * parameter){
@@ -372,10 +374,10 @@ int _2c8bit(int num){
 
 void CAN_Handler(int packet_size){
     if(packet_size){
-      long tmp = CAN.packetID();
+      long tmp = CAN.packetId();
       if(tmp == 0x1F0A000 || tmp == 0x1F0A003 || tmp == 0x1F0A004){
         queue[pos].packetSize = packet_size;
-        queue[pos].packetExtend = CAN.PacketExtended();
+        queue[pos].packetExtended = CAN.packetExtended();
         queue[pos].packetRtr = CAN.packetRtr();
         queue[pos].packetId = CAN.packetId();
         for(int i=0; i<8; i++){
@@ -384,7 +386,7 @@ void CAN_Handler(int packet_size){
        pos++;
        size++;
        if(pos >= 5){pos = 0;}
-       if(size >= 5){serial.println("Holding queue overflow");
+       if(size >= 5){Serial.println("Holding queue overflow");
       }
     }
   }
